@@ -20,8 +20,8 @@ void calculateOverlappingFOV(const cameras::CameraGeometryBase & camera1,
   // clear incoming masks
   cv::Mat outMask1CV = outMask1.getMask();
   cv::Mat outMask2CV = outMask2.getMask();
-  outMask1CV = cv::Mat::zeros(height1, width1, CV_8UC1);
-  outMask2CV = cv::Mat::zeros(height2, width2, CV_8UC1);
+  outMask1CV = cv::Mat::zeros(height1, width1, cv::CV_8UC1);
+  outMask2CV = cv::Mat::zeros(height2, width2, cv::CV_8UC1);
   outMask1.setScale(scale);
   outMask2.setScale(scale);
 

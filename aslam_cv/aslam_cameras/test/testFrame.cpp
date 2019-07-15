@@ -80,11 +80,11 @@ TEST(AslamFrontendTestSuite, testMultiOctaveFrameSerialization)
     F1.setRandom();
     F1.getOctavesMutable()->setNumOctaves(2);
 
-    cv::Mat img0(100, 100, CV_8UC1);
+    cv::Mat img0(100, 100, cv::CV_8UC1);
     cv::randn(img0, cv::Scalar::all(128), cv::Scalar::all(20));
     F1.setImage(img0, 0);
 
-    cv::Mat img1(50, 50, CV_8UC1);
+    cv::Mat img1(50, 50, cv::CV_8UC1);
     cv::randn(img1, cv::Scalar::all(128), cv::Scalar::all(20));
     F1.setImage(img1, 1);
 

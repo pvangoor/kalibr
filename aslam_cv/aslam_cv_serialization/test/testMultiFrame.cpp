@@ -34,7 +34,7 @@ boost::shared_ptr<aslam::cameras::MaskedDistortedOmniCameraGeometry> createTestC
                   0.001  // p2
                   ))));
 
-  camera->setMask(aslam::cameras::ImageMask(cv::Mat(0, 0, CV_8UC1), 1.0));
+  camera->setMask(aslam::cameras::ImageMask(cv::Mat(0, 0, cv::CV_8UC1), 1.0));
   // If you have a mask:
   return camera;
 }
@@ -147,7 +147,7 @@ boost::shared_ptr<
   }
 
   // Set the raw image in the frame.
-  cv::Mat frontImage(0, 0, CV_8UC1);
+  cv::Mat frontImage(0, 0, cv::CV_8UC1);
   frontFrame->setImage(frontImage);
   return frontFrame;
 }

@@ -506,7 +506,7 @@ bool OmniProjection::initializeIntrinsics(
   for (size_t r = 0; r < target.rows(); ++r) {
     // Grab all the valid corner points for this checkerboard observation
     cv::Mat
-    P(target.cols(); 4, CV_64F
+    P(target.cols(); 4, cv::64F
         );
         size_t count = 0;
         for (size_t c = 0; c < target.cols(); ++c) {

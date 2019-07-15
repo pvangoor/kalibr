@@ -33,7 +33,7 @@ void GridDetector::initializeDetector()
 {
   if (_options.plotCornerReprojection) {
     cv::namedWindow("Corner reprojection");
-    cvStartWindowThread();
+    cv::startWindowThread();
   }
 }
 
@@ -186,7 +186,7 @@ bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
   // show plot of reprojected corners
   if (_options.plotCornerReprojection) {
     cv::Mat imageCopy1 = image.clone();
-    cv::cvtColor(imageCopy1, imageCopy1, CV_GRAY2RGB);
+    cv::cvtColor(imageCopy1, imageCopy1, cv::COLOR_GRAY2RGB);
 
     if (success) {
       //calculate reprojection
@@ -194,13 +194,13 @@ bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
       outObservation.getCornerReprojection(_geometry, reprojs);
 
       for (unsigned int i = 0; i < reprojs.size(); i++)
-        cv::circle(imageCopy1, reprojs[i], 3, CV_RGB(255,0,0), 1);
+        cv::circle(imageCopy1, reprojs[i], 3, cv::Scalar(255,0,0), 1);
 
 
     } else {
       cv::putText(imageCopy1, "Detection failed! (frame not used)",
-                  cv::Point(50, 50), CV_FONT_HERSHEY_SIMPLEX, 0.8,
-                  CV_RGB(255,0,0), 3, 8, false);
+                  cv::Point(50, 50), cv::FONT_HERSHEY_SIMPLEX, 0.8,
+                  cv::Scalar(255,0,0), 3, 8, false);
     }
 
     cv::imshow("Corner reprojection", imageCopy1);  // OpenCV call
