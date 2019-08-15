@@ -4,6 +4,9 @@ import aslam_cv as cv
 import numpy as np
 
 def addPoseDesignVariable(problem, T0=sm.Transformation()):
+
+    print(T0.q())
+
     q_Dv = aopt.RotationQuaternionDv( T0.q() )
     q_Dv.setActive( True )
     problem.addDesignVariable(q_Dv)
