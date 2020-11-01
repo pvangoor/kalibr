@@ -17,9 +17,10 @@ namespace sm {
 
     BoostPropertyTreeImplementation();
     BoostPropertyTreeImplementation(const boost::property_tree::ptree& ptree);
-    virtual ~BoostPropertyTreeImplementation();
+    ~BoostPropertyTreeImplementation() override;
 
     void loadXml(const boost::filesystem::path & fileName);
+    void loadXmlFromString(const std::string & xml);
     void saveXml(const boost::filesystem::path & fileName) const;
  
     void loadIni(const boost::filesystem::path & fileName);
@@ -28,36 +29,45 @@ namespace sm {
     void loadInfo(const boost::filesystem::path & fileName);
     void saveInfo(const boost::filesystem::path & fileName) const;
 
-    virtual double getDouble(const std::string & key) const;
-    virtual double getDouble(const std::string & key, double defaultValue) const;
-    virtual double getDouble(const std::string & key, double defaultValue);
+    void loadJson(const boost::filesystem::path & fileName);
+    void saveJson(const boost::filesystem::path & fileName) const;
 
-    virtual int getInt(const std::string & key) const;
-    virtual int getInt(const std::string & key, int defaultValue) const;
-    virtual int getInt(const std::string & key, int defaultValue);
+    void loadString(const std::string & strings);
+    std::string asInfoString() const;
 
-    virtual bool getBool(const std::string & key) const;
-    virtual bool getBool(const std::string & key, bool defaultValue) const;
-    virtual bool getBool(const std::string & key, bool defaultValue);
+    double getDouble(const std::string & key) const override;
+    double getDouble(const std::string & key, double defaultValue) const override;
+    double getDouble(const std::string & key, double defaultValue) override;
 
-    virtual std::string getString(const std::string & key) const;
-    virtual std::string getString(const std::string & key, const std::string & defaultValue) const;
-    virtual std::string getString(const std::string & key, const std::string & defaultValue);
+    int getInt(const std::string & key) const override;
+    int getInt(const std::string & key, int defaultValue) const override;
+    int getInt(const std::string & key, int defaultValue) override;
 
-    virtual void setDouble(const std::string & key, double value);
-    virtual void setInt(const std::string & key, int value);
-    virtual void setBool(const std::string & key, bool value);
-    virtual void setString(const std::string & key, const std::string & value);
+    bool getBool(const std::string & key) const override;
+    bool getBool(const std::string & key, bool defaultValue) const override;
+    bool getBool(const std::string & key, bool defaultValue) override;
 
-    virtual bool doesKeyExist(const std::string & key) const;
+    std::string getString(const std::string & key) const override;
+    std::string getString(const std::string & key, const std::string & defaultValue) const override;
+    std::string getString(const std::string & key, const std::string & defaultValue) override;
+
+    void setDouble(const std::string & key, double value) override;
+    void setInt(const std::string & key, int value) override;
+    void setBool(const std::string & key, bool value) override;
+    void setString(const std::string & key, const std::string & value) override;
+
+    bool doesKeyExist(const std::string & key) const override;
+    void update(const BoostPropertyTreeImplementation & with, bool createIfNecessary, bool ignoreEmptyUpdates);
 
     iterator begin() ;
     const_iterator begin() const;
     iterator end() ;
     const_iterator end() const;    
 
-
+    std::vector<KeyPropertyTreePair> getChildren(const std::string & key) const override;
   private:
+
+    static int getXmlReadOptions();
 
     template<typename T>
     T get(const std::string & key) const;

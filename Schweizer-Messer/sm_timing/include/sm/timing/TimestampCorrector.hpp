@@ -1,4 +1,8 @@
+#ifndef SM_TIMESTAMP_CORRECTOR
+#define SM_TIMESTAMP_CORRECTOR
+
 #include <vector>
+#include <memory>
 #include <sm/assert_macros.hpp>
 
 namespace sm {
@@ -48,6 +52,26 @@ namespace sm {
       time_t correctTimestamp(const time_t & remoteTime, const time_t & localTime);
       
       /** 
+       * Get an estimate of the local time of a given measurement
+       * from the remote timestamp, the local timestamp, and the
+       * previous history of timings.
+       * In the background, this method uses two alternating timestamp correctors
+       * between which it switches to be reactive enough to local changes.
+       *
+       * NOTE: this function must be called with monotonically increasing
+       *       remote timestamps. If this is not followed, an exception will
+       *       be thrown.
+       *
+       * @param remoteTime      The time of an event on the remote clock
+       * @param localTime       The timestamp that the event was received locally
+       * @param switchingPeriod The timespan, when the algorithm switches between
+       *                        the two internal correctors
+       *
+       * @return The estimated actual local time of the event
+       */
+      time_t correctTimestamp(const time_t & remoteTime, const time_t & localTime, const time_t & switchingPeriod);
+
+      /**
        * Using the current best estimate of the relationship between
        * remote and local clocks, get the local time of a remote timestamp.
        * 
@@ -62,12 +86,22 @@ namespace sm {
        */
       size_t convexHullSize() const { return _convexHull.size(); }
 
+      /**
+       * @return The timespan of the convex hull
+       */
+      time_t span() const;
+
+      /**
+       * Clear the points of the convex hull
+       */
+      void reset() { _convexHull.clear(); _midpointSegmentIndex = 0; }
+
       double getSlope() const;
       double getOffset() const;
       
       void printHullPoints()
       {
-	for(unsigned i = 0; i < _convexHull.size(); ++i)
+	for(unsigned i = 0u; i < _convexHull.size(); ++i)
 	  {
 	    std::cout << i << "\t" << _convexHull[i].x << "\t" << _convexHull[i].y;
 	    if(i == _midpointSegmentIndex)
@@ -77,19 +111,18 @@ namespace sm {
       }
     private:
       
-      class Point
-      {
-      public:
-	Point(const time_t & x, const time_t & y) : x(x), y(y) {}
-	// remote time
-	time_t x;
-	// local time
-	time_t y;
+      class Point {
+        public:
+          Point(const time_t & x, const time_t & y) : x(x), y(y) {}
+          // remote time
+          time_t x;
+          // local time
+          time_t y;
 
-	Point operator-(const Point & p) const { return Point(x - p.x, y - p.y); }
-	Point operator+(const Point & p) const { return Point(x + p.x, y + p.y); }
-	bool operator<(const Point & p) const { return x < p.x; }
-	bool operator<(const time_t & t) const { return x < t; }
+        Point operator-(const Point& p) const { return Point(x - p.x, y - p.y); }
+        Point operator+(const Point& p) const { return Point(x + p.x, y + p.y); }
+        bool operator<(const Point& p) const { return x < p.x; }
+        bool operator<(const time_t& t) const { return x < t; }
       };
 
       /** 
@@ -100,7 +133,7 @@ namespace sm {
        * 
        * @return true if the point is above the line.
        */
-      bool isAboveTopLine( const Point & p ) const;
+      bool isAboveTopLine(const Point& p) const;
 
       /** 
        * Is the point, p, above the line defined by the points l1 and l2?
@@ -111,10 +144,11 @@ namespace sm {
        * 
        * @return 
        */
-      bool isAboveLine( const Point & l1, const Point & l2, const Point & p ) const;
+      bool isAboveLine(const Point& l1, const Point& l2, const Point& p) const;
 
       typedef std::vector< Point > convex_hull_t;
       convex_hull_t _convexHull;
+      std::shared_ptr<TimestampCorrector<time_t>> _pendingCorrector;
 
       size_t _midpointSegmentIndex;
       
@@ -124,3 +158,5 @@ namespace sm {
 } // namespace sm
 
 #include "implementation/TimestampCorrector.hpp"
+
+#endif /* SM_TIMESTAMP_CORRECTOR */

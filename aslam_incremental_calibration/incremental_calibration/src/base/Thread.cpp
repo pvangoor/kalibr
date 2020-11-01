@@ -25,11 +25,11 @@
 #include "aslam/calibration/exceptions/InvalidOperationException.h"
 
 #ifdef __NR_gettid
-static pid_t gettid (void) {
+pid_t gettid (void) {
   return syscall(__NR_gettid);
 }
 #else
-static pid_t gettid (void) {
+pid_t gettid (void) {
   return -ENOSYS;
 }
 #endif

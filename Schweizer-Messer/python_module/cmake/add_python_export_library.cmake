@@ -67,26 +67,9 @@ ${SETUP_PY_TEXT}
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
 
   if(APPLE)
-    SET(BOOST_COMPONENTS system)
+    SET(BOOST_COMPONENTS python system)
   else()
-    SET(BOOST_COMPONENTS)
-  endif()
-  if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
-    find_package(Boost QUIET)
-    if(Boost_VERSION LESS 106700)
-      list(APPEND BOOST_COMPONENTS python)
-    else()
-      # The boost_python library has been renamed in Boost 1.67 and the FindBoost.cmake
-      # module requires a Python version suffix:
-      #
-      # References:
-      # - https://www.boost.org/docs/libs/1_67_0/libs/python/doc/html/rn.html
-      # - https://cmake.org/cmake/help/v3.12/module/FindBoost.html
-      #
-      list(APPEND BOOST_COMPONENTS python27)
-    endif()
-  else()
-    list(APPEND BOOST_COMPONENTS python3)
+    SET(BOOST_COMPONENTS python)
   endif()
   find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS}) 
 
@@ -94,12 +77,14 @@ ${SETUP_PY_TEXT}
     # The apple framework headers don't include the numpy headers for some reason.
     GET_FILENAME_COMPONENT(REAL_PYTHON_INCLUDE ${PYTHON_INCLUDE_DIRS} REALPATH)
     IF( ${REAL_PYTHON_INCLUDE} MATCHES Python.framework)
-      message("Trying to find extra headers for numpy from ${REAL_PYTHON_INCLUDE}.")
-      message("Looking in ${REAL_PYTHON_INCLUDE}/../../Extras/lib/python/numpy/core/include/numpy")
-      FIND_PATH(NUMPY_INCLUDE_DIR arrayobject.h
-	${REAL_PYTHON_INCLUDE}/../../Extras/lib/python/numpy/core/include/numpy
-	${REAL_PYTHON_INCLUDE}/numpy
-	)
+      message("Trying to find extra headers for numpy.")
+      set(NUMPY_INCLUDE_HINTS 
+        ${REAL_PYTHON_INCLUDE}/../../Extras/lib/python/numpy/core/include/numpy
+        ${REAL_PYTHON_INCLUDE}/numpy
+        /usr/local/lib/python2.7/site-packages/numpy/core/include/numpy
+      )
+      message("Looking in ${NUMPY_INCLUDE_HINTS}")
+      FIND_PATH(NUMPY_INCLUDE_DIR arrayobject.h ${NUMPY_INCLUDE_HINTS})
       IF(${NUMPY_INCLUDE_DIR} MATCHES NOTFOUND)
 	message("Unable to find numpy include directories: ${NUMPY_INCLUDE_DIR}")
       ELSE()
@@ -126,11 +111,8 @@ ${SETUP_PY_TEXT}
   # Link against boost::python
   target_link_libraries(${TARGET_NAME} ${Boost_LIBRARIES})
 
-  # On OSX and Linux, the python library must end in the extension .so. Build this
-  # filename here.
-  get_property(PYLIB_OUTPUT_FILE TARGET ${TARGET_NAME} PROPERTY LOCATION)
-  get_filename_component(PYLIB_OUTPUT_NAME ${PYLIB_OUTPUT_FILE} NAME_WE)
-  set(PYLIB_SO_NAME ${PYLIB_OUTPUT_NAME}.so)
+  # On OSX and Linux, the python library must end in the extension .so. 
+  set(PYLIB_SO_NAME lib${TARGET_NAME}.so)
 
   if(APPLE)
     SET(DIST_DIR site-packages)
@@ -139,15 +121,15 @@ ${SETUP_PY_TEXT}
   endif()
 
   install(TARGETS ${TARGET_NAME}
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/python2.7/${DIST_DIR}/${TARGET_NAME}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/python2.7/${DIST_DIR}/${TARGET_NAME}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python2.7/${DIST_DIR}/${PYTHON_PACKAGE_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python2.7/${DIST_DIR}/${PYTHON_PACKAGE_NAME}
   )
   
     # Cause the library to be output in the correct directory.
   set(PYTHON_LIB_DIR ${CATKIN_DEVEL_PREFIX}/lib/python2.7/${DIST_DIR}/${PYTHON_PACKAGE_NAME})
   add_custom_command(TARGET ${TARGET_NAME}
     POST_BUILD
-    COMMAND mkdir -p ${PYTHON_LIB_DIR} && cp -v ${PYLIB_OUTPUT_FILE} ${PYTHON_LIB_DIR}/${PYLIB_SO_NAME}
+    COMMAND mkdir -p ${PYTHON_LIB_DIR} && cp -v $<TARGET_FILE:${TARGET_NAME}> ${PYTHON_LIB_DIR}/${PYLIB_SO_NAME}
     WORKING_DIRECTORY ${CATKIN_DEVEL_PREFIX}
     COMMENT "Copying library files to python directory" )
 

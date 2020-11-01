@@ -7,6 +7,9 @@
  * 
  */
 
+#ifndef SM_NSEC_TIME_UTILITIES
+#define SM_NSEC_TIME_UTILITIES
+
 #include <chrono>
 #include <boost/cstdint.hpp>
 
@@ -31,5 +34,14 @@ double nsecToSec( const NsecTime & time );
 /// \brief Convert the time (in seconds) to integer nanoseconds
 NsecTime secToNsec( const double & time );
 
+/// \brief return a magic number representing an invalid timestamp
+constexpr NsecTime getInvalidTime();
+
+/// \brief Is the time valid? This uses a magic number
+///        std::numeric_limits<NsecTime>::min() to represent an invalid time
+bool isValid(const NsecTime & time);
+
 } // namespace timing
 } // namespace sm
+
+#endif /* SM_NSEC_TIME_UTILITIES */
